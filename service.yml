@@ -6,7 +6,7 @@ containers:
 - name: alloy
 
 helm:
-  name: k8s-monitoring
+  name: grafana
   source: https://grafana.github.io/helm-charts
   chart: grafana/k8s-monitoring
   version: 1.0.0
