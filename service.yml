@@ -25,6 +25,8 @@ helm:
     value: '{{wodby_agent_password}}'
   - name: opencost.enabled
     value: false
+  - name: cost.enabled
+    value: false
   - name: logs.enabled
     value: false
   - name: logs.pod_logs.enabled
@@ -34,4 +36,12 @@ helm:
   - name: receivers.grpc.enabled
     value: false
   - name: receivers.http.enabled
+    value: false
+  - name: prometheus-operator-crds.enabled
+    value: false
+  - name: metrics.podMonitors.enabled
+    value: false
+  - name: metrics.probes.enabled
+    value: false
+  - name: metrics.serviceMonitors.enabled
     value: false
