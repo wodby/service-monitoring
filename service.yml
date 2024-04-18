@@ -23,10 +23,11 @@ helm:
     value: '{{wodby_agent_username}}'
   - name: externalServices.prometheus.basicAuth.password
     value: '{{wodby_agent_password}}'
-  - name: metrics.cost.enabled
+  - name: opencost.enabled
     value: false
   - name: logs.enabled
     value: false
   - name: logs.pod_logs.enabled
     value: false
-
+  - name: logs.cluster_events.enabled
+    value: false
