@@ -1,0 +1,25 @@
+name: monitoring
+title: Monitoring
+type: infrastructure
+hostname: monitoring
+containers:
+- name: alloy
+
+helm:
+  name: k8s-monitoring
+  source: https://grafana.github.io/helm-charts
+  chart: grafana/k8s-monitoring
+  version: 0.1.1
+  configurations:
+  - name: alloy
+    resources: alloy.resources
+    env: alloy.extraEnv
+  values:
+  - name: cluster.name
+    value: {{kubernetes.name}}
+  - name: externalServices.prometheus.host
+    value: {{wodby_agent_metrics_endpoint}}
+  - name: externalServices.prometheus.basicAuth.username
+    value: {{wodby_agent_username}}
+  - name: externalServices.prometheus.basicAuth.password
+    value: {{wodby_agent_password}}
