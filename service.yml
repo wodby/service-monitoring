@@ -25,3 +25,5 @@ helm:
     value: {{wodby_agent_password}}
   - name: metrics.cost.enabled
     value: false
+  - name: logs.enabled
+    value: false
