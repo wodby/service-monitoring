@@ -31,3 +31,7 @@ helm:
     value: false
   - name: logs.cluster_events.enabled
     value: false
+  - name: receivers.grpc.enabled
+    value: false
+  - name: receivers.http.enabled
+    value: false
