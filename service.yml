@@ -16,13 +16,13 @@ helm:
     env: alloy.extraEnv
   values:
   - name: cluster.name
-    value: {{kubernetes.name}}
+    value: '{{kubernetes.name}}'
   - name: externalServices.prometheus.host
-    value: {{wodby_agent_metrics_endpoint}}
+    value: '{{wodby_agent_metrics_endpoint}}'
   - name: externalServices.prometheus.basicAuth.username
-    value: {{wodby_agent_username}}
+    value: '{{wodby_agent_username}}'
   - name: externalServices.prometheus.basicAuth.password
-    value: {{wodby_agent_password}}
+    value: '{{wodby_agent_password}}'
   - name: metrics.cost.enabled
     value: false
   - name: logs.enabled
