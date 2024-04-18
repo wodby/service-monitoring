@@ -27,3 +27,7 @@ helm:
     value: false
   - name: logs.enabled
     value: false
+  - name: logs.pod_logs
+    value: false
+  - name: logs.podLogsObjects
+    value: false
