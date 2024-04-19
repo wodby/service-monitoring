@@ -8,7 +8,7 @@ containers:
 helm:
   name: wodby
   source: oci://registry-1.docker.io/wodby/alloy
-  chart: wodby/alloy
+  chart: oci://registry-1.docker.io/wodby/alloy
   version: 0.1.1
   configurations:
   - name: alloy
