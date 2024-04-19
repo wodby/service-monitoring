@@ -25,6 +25,8 @@ helm:
     value: '{{wodby_agent_password}}'
   - name: externalServices.prometheus.writeEndpoint	
     value: ""
+  - name: alloy.fullnameOverride
+    value: '{{service.name}}'
   - name: opencost.enabled
     value: false
   - name: cost.enabled
@@ -50,5 +52,9 @@ helm:
   - name: metrics.probes.enabled
     value: false
   - name: metrics.cost.enabled
+    value: false
+  - name: kube-state-metrics.enabled
+    value: false
+  - name: prometheus-node-exporter.enabled
     value: false
 
