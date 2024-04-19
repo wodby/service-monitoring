@@ -9,7 +9,7 @@ helm:
   name: grafana
   source: https://grafana.github.io/helm-charts
   chart: grafana/k8s-monitoring
-  version: 1.0.0
+  version: 1.0.1
   configurations:
   - name: alloy
     resources: alloy.resources
