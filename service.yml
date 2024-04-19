@@ -23,6 +23,8 @@ helm:
     value: '{{wodby_agent_username}}'
   - name: externalServices.prometheus.basicAuth.password
     value: '{{wodby_agent_password}}'
+  - name: externalServices.prometheus.writeEndpoint	
+    value: ""
   - name: opencost.enabled
     value: false
   - name: cost.enabled
