@@ -4,9 +4,6 @@ type: infrastructure
 hostname: monitoring
 containers:
 - name: alloy
-  env:
-  - name: CLUSTER_NAME
-    value: '{{kubernetes.name}}'
 
 helm:
   name: wodby
@@ -24,3 +21,5 @@ helm:
     value: '{{wodby_agent_username}}'
   - name: basicAuth.password
     value: '{{wodby_agent_password}}'
+  - name: clusterName
+    value: '{{kubernetes.name}}'
