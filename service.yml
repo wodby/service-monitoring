@@ -4,44 +4,23 @@ type: infrastructure
 hostname: monitoring
 containers:
 - name: alloy
+  env:
+  - name: CLUSTER_NAME
+    value: '{{kubernetes.name}}'
 
 helm:
-  name: grafana
-  source: https://grafana.github.io/helm-charts
-  chart: grafana/k8s-monitoring
-  version: 1.0.1
+  name: wodby
+  source: oci://registry-1.docker.io/wodby/alloy
+  chart: wodby/alloy
+  version: 0.1.1
   configurations:
   - name: alloy
     resources: alloy.resources
     env: alloy.extraEnv
   values:
-  - name: cluster.name
-    value: '{{kubernetes.name}}'
-  - name: externalServices.prometheus.host
+  - name: host
     value: '{{wodby_agent_metrics_endpoint}}'
-  - name: externalServices.prometheus.basicAuth.username
+  - name: basicAuth.username
     value: '{{wodby_agent_username}}'
-  - name: externalServices.prometheus.basicAuth.password
+  - name: basicAuth.password
     value: '{{wodby_agent_password}}'
-  - name: opencost.enabled
-    value: false
-  - name: cost.enabled
-    value: false
-  - name: logs.enabled
-    value: false
-  - name: logs.pod_logs.enabled
-    value: false
-  - name: logs.cluster_events.enabled
-    value: false
-  - name: receivers.grpc.enabled
-    value: false
-  - name: receivers.http.enabled
-    value: false
-  - name: prometheus-operator-crds.enabled
-    value: false
-  - name: metrics.podMonitors.enabled
-    value: false
-  - name: metrics.probes.enabled
-    value: false
-  - name: metrics.serviceMonitors.enabled
-    value: false
