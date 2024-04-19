@@ -14,6 +14,8 @@ helm:
   - name: alloy
     resources: alloy.resources
     env: alloy.extraEnv
+    annotations: controller.annotations
+    labels: controller.podLabels
   values:
   - name: host
     value: '{{wodby_agent_metrics_endpoint}}'
