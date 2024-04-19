@@ -16,7 +16,7 @@ helm:
     env: alloy.extraEnv
   values:
   - name: cluster.name
-    value: '{{kubernetes.name}}'
+    value: '{{kubernetes.id}}'
   - name: externalServices.prometheus.host
     value: '{{wodby_agent_metrics_endpoint}}'
   - name: externalServices.prometheus.basicAuth.username
