@@ -61,4 +61,6 @@ helm:
     value: false
   - name: prometheus-node-exporter.enabled
     value: false
+  - name: metrics.node-exporter.metricsTuning.includeMetrics
+    value: '[node_cpu.*,node_exporter_build_info,node_filesystem.*,node_memory.*,process_cpu_seconds_total,process_resident_memory_bytes,node_load*]'
 
