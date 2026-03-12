@@ -11,7 +11,7 @@ helm:
   chart: grafana/k8s-monitoring
   version: 1.0.1
   configurations:
-  - name: alloy
+  - container: alloy
     resources: alloy.resources
     env: alloy.extraEnv
     labels: alloy.labels
@@ -27,7 +27,7 @@ helm:
     value: '{{wodby_agent_password}}'
   - name: externalServices.prometheus.tenantId
     value: '{{org.id}}'
-  - name: externalServices.prometheus.writeEndpoint	
+  - name: externalServices.prometheus.writeEndpoint
     value: ""
   - name: alloy.fullnameOverride
     value: '{{service.name}}'
