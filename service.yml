@@ -29,6 +29,10 @@ helm:
           username: '{{wodby_agent_username}}'
           password: '{{wodby_agent_password}}'
         tenantId: '{{org.id}}'
+  - name: collectors.alloy.enabled
+    value: true
+  - name: clusterMetrics.collector
+    value: alloy
   - name: clusterMetrics.enabled
     value: true
   - name: clusterMetrics.kube-state-metrics.enabled
