@@ -8,59 +8,33 @@ helm:
   name: grafana
   source: https://grafana.github.io/helm-charts
   chart: grafana/k8s-monitoring
-  version: 1.0.1
+  version: 4.0.0
   configurations:
   - container: alloy
-    resources: alloy.resources
-    env: alloy.extraEnv
-    labels: alloy.labels
-    annotations: alloy.controller.extraAnnotations
+    resources: collectorCommon.alloy.alloy.resources
+    env: collectorCommon.alloy.alloy.extraEnv
+    labels: collectorCommon.alloy.controller.extraLabels
+    annotations: collectorCommon.alloy.controller.extraAnnotations
   values:
   - name: cluster.name
     value: '{{kubernetes.id}}'
-  - name: externalServices.prometheus.host
-    value: '{{wodby_agent_metrics_endpoint}}'
-  - name: externalServices.prometheus.basicAuth.username
-    value: '{{wodby_agent_username}}'
-  - name: externalServices.prometheus.basicAuth.password
-    value: '{{wodby_agent_password}}'
-  - name: externalServices.prometheus.tenantId
-    value: '{{org.id}}'
-  - name: externalServices.prometheus.writeEndpoint
-    value: ""
-  - name: alloy.fullnameOverride
-    value: '{{service.name}}'
-  - name: opencost.enabled
+  - name: destinations
+    value:
+    - name: metrics
+      type: prometheus
+      url: '{{wodby_agent_metrics_endpoint}}'
+      auth:
+        type: basic
+        username: '{{wodby_agent_username}}'
+        password: '{{wodby_agent_password}}'
+      tenantId: '{{org.id}}'
+  - name: clusterMetrics.enabled
+    value: true
+  - name: clusterMetrics.kube-state-metrics.enabled
     value: false
-  - name: cost.enabled
+  - name: clusterMetrics.node-exporter.enabled
     value: false
-  - name: logs.enabled
-    value: false
-  - name: logs.pod_logs.enabled
-    value: false
-  - name: logs.cluster_events.enabled
-    value: false
-  - name: receivers.grpc.enabled
-    value: false
-  - name: receivers.http.enabled
-    value: false
-  - name: prometheus-operator-crds.enabled
-    value: false
-  - name: metrics.podMonitors.enabled
-    value: false
-  - name: metrics.probes.enabled
-    value: false
-  - name: metrics.serviceMonitors.enabled
-    value: false
-  - name: metrics.probes.enabled
-    value: false
-  - name: metrics.cost.enabled
-    value: false
-  - name: kube-state-metrics.enabled
-    value: false
-  - name: prometheus-node-exporter.enabled
-    value: false
-  - name: metrics.node-exporter.metricsTuning.includeMetrics
+  - name: clusterMetrics.node-exporter.metricsTuning.includeMetrics
     value: 
     - node_cpu.*
     - node_exporter_build_info
@@ -71,7 +45,7 @@ helm:
     - node_load1
     - node_load15
     - node_load5
-  - name: metrics.cadvisor.metricsTuning.includeMetrics
+  - name: clusterMetrics.cadvisor.metricsTuning.includeMetrics
     value: 
     - container_cpu_cfs_periods_total
     - container_cpu_cfs_throttled_periods_total
@@ -90,5 +64,37 @@ helm:
     - container_network_transmit_bytes_total
     - container_network_transmit_packets_dropped_total
     - container_network_transmit_packets_total
-    - machine_memory_bytes    
+    - machine_memory_bytes
     - machine_cpu_cores
+  - name: fullnameOverride
+    value: '{{service.name}}'
+  - name: annotationAutodiscovery.enabled
+    value: false
+  - name: prometheusOperatorObjects.enabled
+    value: false
+  - name: applicationObservability.enabled
+    value: false
+  - name: clusterEvents.enabled
+    value: false
+  - name: podLogsViaLoki.enabled
+    value: false
+  - name: podLogsViaOpenTelemetry.enabled
+    value: false
+  - name: podLogsViaKubernetesApi.enabled
+    value: false
+  - name: podLogsObjects.enabled
+    value: false
+  - name: costMetrics.enabled
+    value: false
+  - name: telemetryServices.kube-state-metrics.deploy
+    value: false
+  - name: telemetryServices.node-exporter.deploy
+    value: false
+  - name: telemetryServices.opencost.deploy
+    value: false
+  - name: telemetryServices.kepler.deploy
+    value: false
+  - name: telemetryServices.windows-exporter.deploy
+    value: false
+  - name: alloy-operator.deploy
+    value: true
