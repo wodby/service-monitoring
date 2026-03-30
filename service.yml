@@ -1,5 +1,6 @@
 name: monitoring
 title: Monitoring
+icon: grafana
 type: infrastructure
 containers:
 - name: alloy
