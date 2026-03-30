@@ -53,6 +53,11 @@ helm:
 
       discovery.relabel "kubelet" {
         targets = discovery.relabel.nodes.output
+
+        rule {
+          source_labels = ["node"]
+          target_label = "instance"
+        }
       }
 
       prometheus.scrape "kubelet" {
@@ -92,6 +97,11 @@ helm:
           replacement = "/metrics/resource"
           target_label = "__metrics_path__"
         }
+
+        rule {
+          source_labels = ["node"]
+          target_label = "instance"
+        }
       }
 
       prometheus.scrape "kubelet_resources" {
@@ -130,6 +140,11 @@ helm:
         rule {
           replacement = "/metrics/cadvisor"
           target_label = "__metrics_path__"
+        }
+
+        rule {
+          source_labels = ["node"]
+          target_label = "instance"
         }
       }
 
@@ -267,6 +282,11 @@ helm:
           source_labels = ["__meta_kubernetes_pod_name"]
           target_label = "pod"
         }
+
+        rule {
+          source_labels = ["__meta_kubernetes_pod_node_name"]
+          target_label = "instance"
+        }
       }
 
       prometheus.scrape "node_exporter" {
@@ -339,7 +359,7 @@ helm:
       prometheus.relabel "kube_state_metrics" {
         rule {
           source_labels = ["__name__"]
-          regex = "up|scrape_samples_scraped|kube_node_status_allocatable|kube_pod_info|kube_pod_container_resource_requests|kube_node_status_condition"
+          regex = "up|scrape_samples_scraped|kube_node_info|kube_node_created|kube_node_status_allocatable|kube_pod_info|kube_pod_container_resource_requests|kube_node_status_condition"
           action = "keep"
         }
 
