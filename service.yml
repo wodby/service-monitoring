@@ -21,31 +21,18 @@ helm:
     value: '{{kubernetes.id}}'
   - name: destinations
     value:
-    - name: metrics
-      type: prometheus
-      url: '{{wodby_agent_metrics_endpoint}}'
-      auth:
-        type: basic
-        username: '{{wodby_agent_username}}'
-        password: '{{wodby_agent_password}}'
-      tenantId: '{{org.id}}'
+      metrics:
+        type: prometheus
+        url: '{{wodby_agent_metrics_endpoint}}'
+        auth:
+          type: basic
+          username: '{{wodby_agent_username}}'
+          password: '{{wodby_agent_password}}'
+        tenantId: '{{org.id}}'
   - name: clusterMetrics.enabled
     value: true
   - name: clusterMetrics.kube-state-metrics.enabled
     value: false
-  - name: clusterMetrics.node-exporter.enabled
-    value: false
-  - name: clusterMetrics.node-exporter.metricsTuning.includeMetrics
-    value: 
-    - node_cpu.*
-    - node_exporter_build_info
-    - node_filesystem.*
-    - node_memory.*
-    - process_cpu_seconds_total
-    - process_resident_memory_bytes
-    - node_load1
-    - node_load15
-    - node_load5
   - name: clusterMetrics.cadvisor.metricsTuning.includeMetrics
     value: 
     - container_cpu_cfs_periods_total
