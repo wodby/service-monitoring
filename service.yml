@@ -8,85 +8,264 @@ containers:
 helm:
   name: grafana
   source: https://grafana.github.io/helm-charts
-  chart: grafana/k8s-monitoring
-  version: 4.0.0
+  chart: grafana/alloy
+  version: 1.6.2
   configurations:
   - container: alloy
-    resources: collectorCommon.alloy.alloy.resources
-    env: collectorCommon.alloy.alloy.extraEnv
-    labels: collectorCommon.alloy.controller.extraLabels
-    annotations: collectorCommon.alloy.controller.extraAnnotations
+    resources: alloy.resources
+    env: alloy.extraEnv
+    labels: controller.podLabels
+    annotations: controller.podAnnotations
   values:
-  - name: cluster.name
-    value: '{{kubernetes.id}}'
-  - name: destinations
-    value:
-      metrics:
-        type: prometheus
-        url: '{{wodby_agent_metrics_endpoint}}'
-        auth:
-          type: basic
-          username: '{{wodby_agent_username}}'
-          password: '{{wodby_agent_password}}'
-        tenantId: '{{org.id}}'
-  - name: collectors.alloy.enabled
-    value: true
-  - name: clusterMetrics.collector
-    value: alloy
-  - name: clusterMetrics.enabled
-    value: true
-  - name: clusterMetrics.kube-state-metrics.enabled
-    value: false
-  - name: clusterMetrics.cadvisor.metricsTuning.includeMetrics
-    value: 
-    - container_cpu_cfs_periods_total
-    - container_cpu_cfs_throttled_periods_total
-    - container_cpu_usage_seconds_total
-    - container_fs_reads_bytes_total
-    - container_fs_reads_total
-    - container_fs_writes_bytes_total
-    - container_fs_writes_total
-    - container_memory_cache
-    - container_memory_rss
-    - container_memory_swap
-    - container_memory_working_set_bytes
-    - container_network_receive_bytes_total
-    - container_network_receive_packets_dropped_total
-    - container_network_receive_packets_total
-    - container_network_transmit_bytes_total
-    - container_network_transmit_packets_dropped_total
-    - container_network_transmit_packets_total
-    - machine_memory_bytes
-    - machine_cpu_cores
   - name: fullnameOverride
     value: '{{service.name}}'
-  - name: annotationAutodiscovery.enabled
+  - name: crds.create
     value: false
-  - name: prometheusOperatorObjects.enabled
+  - name: service.enabled
     value: false
-  - name: applicationObservability.enabled
+  - name: configReloader.enabled
     value: false
-  - name: clusterEvents.enabled
+  - name: controller.type
+    value: deployment
+  - name: controller.replicas
+    value: 1
+  - name: alloy.enableReporting
     value: false
-  - name: podLogsViaLoki.enabled
-    value: false
-  - name: podLogsViaOpenTelemetry.enabled
-    value: false
-  - name: podLogsViaKubernetesApi.enabled
-    value: false
-  - name: podLogsObjects.enabled
-    value: false
-  - name: costMetrics.enabled
-    value: false
-  - name: telemetryServices.kube-state-metrics.deploy
-    value: false
-  - name: telemetryServices.node-exporter.deploy
-    value: false
-  - name: telemetryServices.opencost.deploy
-    value: false
-  - name: telemetryServices.kepler.deploy
-    value: false
-  - name: telemetryServices.windows-exporter.deploy
-    value: false
-  - name: alloy-operator.deploy
-    value: true
+  - name: alloy.configMap.content
+    value: |
+      discovery.kubernetes "nodes" {
+        role = "node"
+      }
+
+      discovery.relabel "nodes" {
+        targets = discovery.kubernetes.nodes.targets
+
+        rule {
+          source_labels = ["__meta_kubernetes_node_name"]
+          target_label  = "node"
+        }
+
+        rule {
+          replacement = "kubernetes"
+          target_label = "source"
+        }
+      }
+
+      discovery.relabel "kubelet" {
+        targets = discovery.relabel.nodes.output
+      }
+
+      prometheus.scrape "kubelet" {
+        targets  = discovery.relabel.kubelet.output
+        job_name = "integrations/kubernetes/kubelet"
+        scheme   = "https"
+        scrape_interval = "60s"
+        scrape_timeout = "10s"
+        scrape_protocols = ["OpenMetricsText1.0.0", "OpenMetricsText0.0.1", "PrometheusText0.0.4"]
+        scrape_classic_histograms = false
+        scrape_native_histograms = false
+        bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+
+        tls_config {
+          ca_file = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+          insecure_skip_verify = true
+          server_name = "kubernetes"
+        }
+
+        forward_to = [prometheus.relabel.kubelet.receiver]
+      }
+
+      prometheus.relabel "kubelet" {
+        rule {
+          source_labels = ["__name__"]
+          regex = "up|scrape_samples_scraped|go_goroutines|kubelet_certificate_manager_client_expiration_renew_errors|kubelet_certificate_manager_client_ttl_seconds|kubelet_certificate_manager_server_ttl_seconds|kubelet_cgroup_manager_duration_seconds_bucket|kubelet_cgroup_manager_duration_seconds_count|kubelet_node_config_error|kubelet_node_name|kubelet_pleg_relist_duration_seconds_bucket|kubelet_pleg_relist_duration_seconds_count|kubelet_pleg_relist_interval_seconds_bucket|kubelet_pod_start_duration_seconds_bucket|kubelet_pod_start_duration_seconds_count|kubelet_pod_worker_duration_seconds_bucket|kubelet_pod_worker_duration_seconds_count|kubelet_running_container_count|kubelet_running_containers|kubelet_running_pod_count|kubelet_running_pods|kubelet_runtime_operations_errors_total|kubelet_runtime_operations_total|kubelet_server_expiration_renew_errors|kubelet_volume_stats_available_bytes|kubelet_volume_stats_capacity_bytes|kubelet_volume_stats_inodes|kubelet_volume_stats_inodes_free|kubelet_volume_stats_inodes_used|kubelet_volume_stats_used_bytes|kubernetes_build_info|namespace_workload_pod|process_cpu_seconds_total|process_resident_memory_bytes|rest_client_requests_total|storage_operation_duration_seconds_count|storage_operation_errors_total|volume_manager_total_volumes"
+          action = "keep"
+        }
+
+        forward_to = [prometheus.remote_write.metrics.receiver]
+      }
+
+      discovery.relabel "kubelet_resources" {
+        targets = discovery.relabel.nodes.output
+
+        rule {
+          replacement = "/metrics/resource"
+          target_label = "__metrics_path__"
+        }
+      }
+
+      prometheus.scrape "kubelet_resources" {
+        targets  = discovery.relabel.kubelet_resources.output
+        job_name = "integrations/kubernetes/resources"
+        scheme   = "https"
+        scrape_interval = "60s"
+        scrape_timeout = "10s"
+        scrape_protocols = ["OpenMetricsText1.0.0", "OpenMetricsText0.0.1", "PrometheusText0.0.4"]
+        scrape_classic_histograms = false
+        scrape_native_histograms = false
+        bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+
+        tls_config {
+          ca_file = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+          insecure_skip_verify = true
+          server_name = "kubernetes"
+        }
+
+        forward_to = [prometheus.relabel.kubelet_resources.receiver]
+      }
+
+      prometheus.relabel "kubelet_resources" {
+        rule {
+          source_labels = ["__name__"]
+          regex = "up|scrape_samples_scraped|node_cpu_usage_seconds_total|node_memory_working_set_bytes"
+          action = "keep"
+        }
+
+        forward_to = [prometheus.remote_write.metrics.receiver]
+      }
+
+      discovery.relabel "cadvisor" {
+        targets = discovery.relabel.nodes.output
+
+        rule {
+          replacement = "/metrics/cadvisor"
+          target_label = "__metrics_path__"
+        }
+      }
+
+      prometheus.scrape "cadvisor" {
+        targets  = discovery.relabel.cadvisor.output
+        job_name = "integrations/kubernetes/cadvisor"
+        scheme   = "https"
+        scrape_interval = "60s"
+        scrape_timeout = "10s"
+        scrape_protocols = ["OpenMetricsText1.0.0", "OpenMetricsText0.0.1", "PrometheusText0.0.4"]
+        scrape_classic_histograms = false
+        scrape_native_histograms = false
+        bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+
+        tls_config {
+          ca_file = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+          insecure_skip_verify = true
+          server_name = "kubernetes"
+        }
+
+        forward_to = [prometheus.relabel.cadvisor.receiver]
+      }
+
+      prometheus.relabel "cadvisor" {
+        rule {
+          source_labels = ["__name__"]
+          regex = "up|scrape_samples_scraped|container_cpu_cfs_periods_total|container_cpu_cfs_throttled_periods_total|container_cpu_usage_seconds_total|container_fs_reads_bytes_total|container_fs_reads_total|container_fs_writes_bytes_total|container_fs_writes_total|container_memory_cache|container_memory_rss|container_memory_swap|container_memory_working_set_bytes|container_network_receive_bytes_total|container_network_receive_packets_dropped_total|container_network_receive_packets_total|container_network_transmit_bytes_total|container_network_transmit_packets_dropped_total|container_network_transmit_packets_total|machine_memory_bytes|machine_cpu_cores"
+          action = "keep"
+        }
+
+        rule {
+          source_labels = ["__name__", "container"]
+          separator = "@"
+          regex = "(container_cpu_.*|container_fs_.*|container_memory_.*)@"
+          action = "drop"
+        }
+
+        rule {
+          source_labels = ["__name__", "image"]
+          separator = "@"
+          regex = "(container_cpu_.*|container_fs_.*|container_memory_.*|container_network_.*)@"
+          action = "drop"
+        }
+
+        rule {
+          source_labels = ["__name__", "boot_id"]
+          separator = "@"
+          regex = "machine_memory_bytes@.*"
+          target_label = "boot_id"
+          replacement = "NA"
+        }
+
+        rule {
+          source_labels = ["__name__", "system_uuid"]
+          separator = "@"
+          regex = "machine_memory_bytes@.*"
+          target_label = "system_uuid"
+          replacement = "NA"
+        }
+
+        rule {
+          source_labels = ["__name__", "device"]
+          separator = "@"
+          regex = "container_fs_.*@(/dev/)?(mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dasd.+)"
+          target_label = "__keepme"
+          replacement = "1"
+        }
+
+        rule {
+          source_labels = ["__name__", "__keepme"]
+          separator = "@"
+          regex = "container_fs_.*@"
+          action = "drop"
+        }
+
+        rule {
+          source_labels = ["__name__"]
+          regex = "container_fs_.*"
+          target_label = "__keepme"
+          replacement = ""
+        }
+
+        rule {
+          source_labels = ["__name__", "interface"]
+          separator = "@"
+          regex = "container_network_.*@(en[ospx][0-9].*|wlan[0-9].*|eth[0-9].*)"
+          target_label = "__keepme"
+          replacement = "1"
+        }
+
+        rule {
+          source_labels = ["__name__", "__keepme"]
+          separator = "@"
+          regex = "container_network_.*@"
+          action = "drop"
+        }
+
+        rule {
+          source_labels = ["__name__"]
+          regex = "container_network_.*"
+          target_label = "__keepme"
+          replacement = ""
+        }
+
+        forward_to = [prometheus.remote_write.metrics.receiver]
+      }
+
+      prometheus.remote_write "metrics" {
+        endpoint {
+          url = "{{wodby_agent_metrics_endpoint}}"
+
+          headers = {
+            "X-Scope-OrgID" = "{{org.id}}",
+          }
+
+          basic_auth {
+            username = "{{wodby_agent_username}}"
+            password = "{{wodby_agent_password}}"
+          }
+
+          tls_config {
+            insecure_skip_verify = false
+          }
+
+          write_relabel_config {
+            source_labels = ["cluster"]
+            regex = ""
+            replacement = "{{kubernetes.id}}"
+            target_label = "cluster"
+          }
+
+          write_relabel_config {
+            source_labels = ["k8s_cluster_name"]
+            regex = ""
+            replacement = "{{kubernetes.id}}"
+            target_label = "k8s_cluster_name"
+          }
+        }
+      }
