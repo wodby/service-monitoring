@@ -1,7 +1,6 @@
 name: monitoring
 title: Monitoring
 type: infrastructure
-hostname: monitoring
 containers:
 - name: alloy
 
