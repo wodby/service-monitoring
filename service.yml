@@ -389,16 +389,16 @@ helm:
           }
         }
       }
+
 workloads:
 - id: main
   kind: deployment
   primary: true
-  containers:
-  - name: alloy
-
-    helm:
-      resources: alloy.resources
-      env: alloy.extraEnv
   helm:
     labels: controller.podLabels
     annotations: controller.podAnnotations
+  containers:
+  - name: alloy
+    helm:
+      resources: alloy.resources
+      env: alloy.extraEnv
