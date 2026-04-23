@@ -2,20 +2,11 @@ name: monitoring
 title: Monitoring
 icon: grafana
 type: infrastructure
-containers:
-- name: alloy
-
 helm:
   name: grafana
   source: https://grafana.github.io/helm-charts
   chart: grafana/alloy
   version: 1.6.2
-  configurations:
-  - container: alloy
-    resources: alloy.resources
-    env: alloy.extraEnv
-    labels: controller.podLabels
-    annotations: controller.podAnnotations
   values:
   - name: fullnameOverride
     value: '{{service.name}}'
@@ -398,3 +389,16 @@ helm:
           }
         }
       }
+workloads:
+- id: main
+  kind: deployment
+  primary: true
+  containers:
+  - name: alloy
+
+    helm:
+      resources: alloy.resources
+      env: alloy.extraEnv
+  helm:
+    labels: controller.podLabels
+    annotations: controller.podAnnotations
