@@ -5,6 +5,8 @@ discovery.kubernetes "nodes" {
 discovery.relabel "nodes" {
   targets = discovery.kubernetes.nodes.targets
 
+  {{wodby_k3s_cilium_kubelet_target_rules}}
+
   rule {
     source_labels = ["__meta_kubernetes_node_name"]
     target_label  = "node"
