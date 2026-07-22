@@ -6,7 +6,7 @@ helm:
   name: grafana
   source: https://grafana.github.io/helm-charts
   chart: grafana/alloy
-  version: 1.10.1
+  version: 1.11.0
   values:
   - name: fullnameOverride
     value: '{{service.name}}'
