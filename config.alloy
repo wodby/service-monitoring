@@ -336,6 +336,7 @@ prometheus.relabel "kube_state_metrics" {
 prometheus.remote_write "metrics" {
   endpoint {
     url = "{{wodby_agent_metrics_endpoint}}"
+    proxy_from_environment = true
 
     headers = {
       "X-Scope-OrgID" = "{{org.id}}",

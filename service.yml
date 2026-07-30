@@ -22,6 +22,11 @@ helm:
     value: 1
   - name: alloy.enableReporting
     value: false
+  - name: alloy.envFrom
+    value:
+    - secretRef:
+        name: '{{kubernetes.frpc.egressProxyExistingSecret}}'
+        optional: true
 
 configs:
 - name: alloy
