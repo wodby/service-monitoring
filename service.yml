@@ -9,6 +9,9 @@ helm:
   version: 1.11.1
   valueMappings:
     replicas: controller.replicas
+    strategy: controller.updateStrategy
+    minReady: controller.minReadySeconds
+    shutdownGracePeriod: controller.terminationGracePeriodSeconds
   values:
   - name: fullnameOverride
     value: '{{service.name}}'
