@@ -6,7 +6,7 @@ helm:
   name: grafana
   source: https://grafana.github.io/helm-charts
   chart: grafana/alloy
-  version: 1.14.3
+  version: 1.14.4
   valueMappings:
     replicas: controller.replicas
     strategy: controller.updateStrategy
