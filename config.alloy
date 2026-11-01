@@ -326,8 +326,15 @@ prometheus.scrape "kube_state_metrics" {
 prometheus.relabel "kube_state_metrics" {
   rule {
     source_labels = ["__name__"]
-    regex = "up|scrape_samples_scraped|kube_node_info|kube_node_created|kube_node_status_allocatable|kube_pod_info|kube_pod_container_resource_requests|kube_node_status_condition"
+    regex = "up|scrape_samples_scraped|kube_node_info|kube_node_created|kube_node_status_allocatable|kube_pod_info|kube_pod_container_resource_requests|kube_pod_container_resource_limits|kube_pod_status_phase|kube_node_status_condition"
     action = "keep"
+  }
+
+  rule {
+    source_labels = ["__name__", "phase"]
+    separator = "@"
+    regex = "kube_pod_status_phase@(Succeeded|Failed|Unknown)"
+    action = "drop"
   }
 
   forward_to = [prometheus.remote_write.metrics.receiver]
