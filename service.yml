@@ -50,6 +50,10 @@ workloads:
     annotations: controller.podAnnotations
   containers:
   - name: alloy
+    resources:
+      request:
+        cpu: 10
+        memory: 112
     helm:
       resources: alloy.resources
       env: alloy.extraEnv
