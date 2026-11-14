@@ -272,7 +272,7 @@ prometheus.scrape "node_exporter" {
 prometheus.relabel "node_exporter" {
   rule {
     source_labels = ["__name__"]
-    regex = "up|scrape_samples_scraped|node_cpu.*|node_exporter_build_info|node_filesystem.*|node_memory.*|process_cpu_seconds_total|process_resident_memory_bytes|node_load1|node_load15|node_load5"
+    regex = "up|scrape_samples_scraped|node_cpu.*|node_exporter_build_info|node_filesystem.*|node_memory.*|process_cpu_seconds_total|process_resident_memory_bytes|node_load1|node_load15|node_load5|wodby_local_path_volume_used_bytes|wodby_local_path_volume_scan_timestamp_seconds"
     action = "keep"
   }
 
